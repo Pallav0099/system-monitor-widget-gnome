@@ -1,0 +1,9 @@
+window {
+    background-color: #2E2E2E;
+}
+
+.drawing-area {
+    border-radius: 10px;
+    background-color: #333;
+}
+

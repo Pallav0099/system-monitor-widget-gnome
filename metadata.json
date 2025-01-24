@@ -1,0 +1,10 @@
+{
+    "uuid": "system-monitor-widget@pallav",
+    "name": "System Monitor Widget",
+    "description": "A widget to display CPU and memory usage as a graph.",
+    "version": 1.0,
+    "shell-version": ["3.36", "3.38", "40", "41"],
+    "url": "https://github.com/Pallav0099/system-monitor-widget-gnome",
+    "license": "MIT"
+}
+

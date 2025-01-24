@@ -1,11 +1,11 @@
-#move this file to /etc/systemd/system/.....
 [Unit]
-Description=System Monitor Metrics Collector
+Description=System Monitor Widget
+After=graphical.target
 
 [Service]
-ExecStart=/usr/bin/python3 /path/to/metrics.py
-Restart=always
+Type=simple
+ExecStart=/usr/bin/python3 /path/to/system_monitor_widget.py
+Restart=on-failure
 
 [Install]
-WantedBy=multi-user.target
-
+WantedBy=default.target
