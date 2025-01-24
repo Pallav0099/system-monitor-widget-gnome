@@ -1,0 +1,11 @@
+#move this file to /etc/systemd/system/.....
+[Unit]
+Description=System Monitor Metrics Collector
+
+[Service]
+ExecStart=/usr/bin/python3 /path/to/metrics.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

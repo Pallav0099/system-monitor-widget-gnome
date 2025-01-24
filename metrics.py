@@ -14,5 +14,5 @@ def collect_metrics():
 if __name__ == "__main__":
     while True:
         collect_metrics()
-        time.sleep(5)  # Update every 5 seconds
+        time.sleep(5)  # Change the value if you wish to have a slower or faster update time
 
