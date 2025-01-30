@@ -3,32 +3,68 @@ gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, GLib
 from metrics import get_cpu_usage, get_memory_usage, get_disk_usage
 
-class SystemMonitorWindow(Gtk.Window):
+class TransparentWindow(Gtk.Window):
     def __init__(self):
-        super().__init__(title="System Monitor")
-        self.set_default_size(300, 400)
+        super().__init__()
 
-        # Get screen dimensions using Gdk.Display and Gdk.Monitor
-        display = Gdk.Display.get_default()
-        monitor = display.get_primary_monitor()
-        geometry = monitor.get_geometry()
-        screen_width = geometry.width
-        screen_height = geometry.height
+        # Set the window to have no decorations (remove title bar)
+        self.set_decorated(False)
+        print("Window decorations removed.")
 
-        window_width, window_height = self.get_default_size()
-        self.move(0, (screen_height - window_height) // 2)
+        # Make the window transparent
+        self.set_app_paintable(True)
+        screen = self.get_screen()
+        visual = screen.get_rgba_visual()
+        if visual and screen.is_composited():
+            self.set_visual(visual)
+            print("Transparency enabled.")
+        else:
+            print("Transparency not supported. Ensure compositing is enabled in your desktop environment.")
 
-        # Apply CSS styles
-        self.apply_styles()
+        # Use a Gtk.Overlay to layer the transparent background behind other widgets
+        self.overlay = Gtk.Overlay()
+        self.add(self.overlay)
 
-        # Initialize data for graphs
+        # Add a drawing area for the transparent background
+        self.background = Gtk.DrawingArea()
+        self.background.connect("draw", self.on_draw_background)
+        self.overlay.add(self.background)
+
+        # Add the system monitor widgets
+        self.system_monitor = SystemMonitorWidget()
+        self.overlay.add_overlay(self.system_monitor)
+
+        # Disable window interaction
+        self.set_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.POINTER_MOTION_MASK | Gdk.EventMask.KEY_PRESS_MASK)
+        self.connect("button-press-event", self.on_button_press)
+        self.connect("key-press-event", self.on_key_press)
+        print("Window interaction disabled.")
+
+        # Set the window size and display it
+        self.set_size_request(400, 600)
+        self.connect("delete-event", Gtk.main_quit)
+        self.show_all()
+
+    def on_draw_background(self, widget, cr):
+        cr.set_source_rgba(0, 0, 0, 0)  # Set RGBA value to transparent
+        cr.paint()  # Draw the transparent background
+
+    def on_button_press(self, widget, event):
+        print("Button press event blocked.")
+        return True
+
+    def on_key_press(self, widget, event):
+        print("Key press event blocked.")
+        return True
+
+class SystemMonitorWidget(Gtk.Box):
+    def __init__(self):
+        super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+
+        # data for graphs
         self.cpu_usage = []
         self.memory_usage = []
         self.disk_usage = []
-
-        # Create a Box to organize the content vertically
-        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        self.add(self.box)
 
         # CPU Graph Section
         self.cpu_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
@@ -57,26 +93,13 @@ class SystemMonitorWindow(Gtk.Window):
         self.disk_box.pack_start(self.disk_label, False, False, 0)
         self.disk_box.pack_start(self.drawing_area_disk, True, True, 0)
 
-        # Add all sections to the main Box
-        self.box.pack_start(self.cpu_box, True, True, 0)
-        self.box.pack_start(self.memory_box, True, True, 0)
-        self.box.pack_start(self.disk_box, True, True, 0)
+        #all sections to the main Box
+        self.pack_start(self.cpu_box, True, True, 0)
+        self.pack_start(self.memory_box, True, True, 0)
+        self.pack_start(self.disk_box, True, True, 0)
 
-        # Start a timer to update the graph every second
+        # timer to update the graph every second
         GLib.timeout_add(1000, self.update_data)
-
-    def apply_styles(self):
-        """Load and apply CSS styles from the styles.css file."""
-        css_provider = Gtk.CssProvider()
-        css_provider.load_from_path("styles.css")
-        display = Gdk.Display.get_default()
-        screen = display.get_default_screen()
-        style_context = Gtk.StyleContext()
-        style_context.add_provider_for_screen(
-            screen,
-            css_provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
-        )
 
     def update_data(self):
         """Fetch new data for CPU, memory, and disk usage."""
@@ -133,7 +156,7 @@ class SystemMonitorWindow(Gtk.Window):
             cr.stroke()
 
 if __name__ == "__main__":
-    win = SystemMonitorWindow()
+    win = TransparentWindow()
     win.connect("destroy", Gtk.main_quit)
     win.show_all()
     Gtk.main()
