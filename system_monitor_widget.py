@@ -7,11 +7,10 @@ class TransparentWindow(Gtk.Window):
     def __init__(self):
         super().__init__()
 
-        # Set the window to have no decorations (remove title bar)
         self.set_decorated(False)
         print("Window decorations removed.")
 
-        # Make the window transparent
+        #set window transparent
         self.set_app_paintable(True)
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
@@ -21,33 +20,29 @@ class TransparentWindow(Gtk.Window):
         else:
             print("Transparency not supported. Ensure compositing is enabled in your desktop environment.")
 
-        # Use a Gtk.Overlay to layer the transparent background behind other widgets
         self.overlay = Gtk.Overlay()
         self.add(self.overlay)
 
-        # Add a drawing area for the transparent background
+        # Transparent background code
         self.background = Gtk.DrawingArea()
         self.background.connect("draw", self.on_draw_background)
         self.overlay.add(self.background)
 
-        # Add the system monitor widgets
         self.system_monitor = SystemMonitorWidget()
         self.overlay.add_overlay(self.system_monitor)
 
-        # Disable window interaction
         self.set_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.POINTER_MOTION_MASK | Gdk.EventMask.KEY_PRESS_MASK)
         self.connect("button-press-event", self.on_button_press)
         self.connect("key-press-event", self.on_key_press)
         print("Window interaction disabled.")
 
-        # Set the window size and display it
         self.set_size_request(400, 600)
         self.connect("delete-event", Gtk.main_quit)
         self.show_all()
 
     def on_draw_background(self, widget, cr):
-        cr.set_source_rgba(0, 0, 0, 0)  # Set RGBA value to transparent
-        cr.paint()  # Draw the transparent background
+        cr.set_source_rgba(0, 0, 0, 0)
+        cr.paint()
 
     def on_button_press(self, widget, event):
         print("Button press event blocked.")
@@ -66,7 +61,7 @@ class SystemMonitorWidget(Gtk.Box):
         self.memory_usage = []
         self.disk_usage = []
 
-        # CPU Graph Section
+        # CPU Graph
         self.cpu_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         self.cpu_label = Gtk.Label(label="CPU Usage")
         self.drawing_area_cpu = Gtk.DrawingArea()
@@ -75,7 +70,7 @@ class SystemMonitorWidget(Gtk.Box):
         self.cpu_box.pack_start(self.cpu_label, False, False, 0)
         self.cpu_box.pack_start(self.drawing_area_cpu, True, True, 0)
 
-        # Memory Graph Section
+        # Memory Graph
         self.memory_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         self.memory_label = Gtk.Label(label="Memory Usage")
         self.drawing_area_memory = Gtk.DrawingArea()
@@ -84,7 +79,7 @@ class SystemMonitorWidget(Gtk.Box):
         self.memory_box.pack_start(self.memory_label, False, False, 0)
         self.memory_box.pack_start(self.drawing_area_memory, True, True, 0)
 
-        # Disk Usage Section
+        # Disk Usage
         self.disk_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
         self.disk_label = Gtk.Label(label="Disk Usage")
         self.drawing_area_disk = Gtk.DrawingArea()
@@ -93,12 +88,11 @@ class SystemMonitorWidget(Gtk.Box):
         self.disk_box.pack_start(self.disk_label, False, False, 0)
         self.disk_box.pack_start(self.drawing_area_disk, True, True, 0)
 
-        #all sections to the main Box
         self.pack_start(self.cpu_box, True, True, 0)
         self.pack_start(self.memory_box, True, True, 0)
         self.pack_start(self.disk_box, True, True, 0)
 
-        # timer to update the graph every second
+        # data update timer
         GLib.timeout_add(1000, self.update_data)
 
     def update_data(self):
@@ -118,32 +112,31 @@ class SystemMonitorWidget(Gtk.Box):
         if len(self.disk_usage) > 50:
             self.disk_usage.pop(0)
 
-        self.drawing_area_cpu.queue_draw()  # Trigger redraw for CPU graph
-        self.drawing_area_memory.queue_draw()  # Trigger redraw for Memory graph
-        self.drawing_area_disk.queue_draw()  # Trigger redraw for Disk graph
+        self.drawing_area_cpu.queue_draw()
+        self.drawing_area_memory.queue_draw()
+        self.drawing_area_disk.queue_draw()
 
         return True
 
     def on_draw_cpu(self, widget, cr):
         """Draw the CPU usage graph."""
-        self.draw_graph(widget, cr, self.cpu_usage, (0, 0, 1))  # Blue for CPU
+        self.draw_graph(widget, cr, self.cpu_usage, (0, 0, 1))
 
     def on_draw_memory(self, widget, cr):
         """Draw the Memory usage graph."""
-        self.draw_graph(widget, cr, self.memory_usage, (0, 1, 0))  # Green for Memory
+        self.draw_graph(widget, cr, self.memory_usage, (0, 1, 0))
 
     def on_draw_disk(self, widget, cr):
         """Draw the Disk usage graph."""
-        self.draw_graph(widget, cr, self.disk_usage, (1, 0, 0))  # Red for Disk
+        self.draw_graph(widget, cr, self.disk_usage, (1, 0, 0))
 
     def draw_graph(self, widget, cr, data, color):
         """Generic function to draw a graph."""
         width, height = widget.get_allocated_width(), widget.get_allocated_height()
-        cr.set_source_rgb(1, 1, 1)  # White background
+        cr.set_source_rgba(0, 0, 0, 0) #graph background
         cr.paint()
-
-        # Draw the graph border
-        cr.set_source_rgb(0, 0, 0)  # Black border
+        
+        cr.set_source_rgb(0, 0, 0)
         cr.set_line_width(2)
         cr.rectangle(0, 0, width, height)
         cr.stroke()
