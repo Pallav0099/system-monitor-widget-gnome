@@ -120,15 +120,15 @@ class SystemMonitorWidget(Gtk.Box):
 
     def on_draw_cpu(self, widget, cr):
         """Draw the CPU usage graph."""
-        self.draw_graph(widget, cr, self.cpu_usage, (0, 0, 1))
+        self.draw_graph(widget, cr, self.cpu_usage, (255, 239, 213))
 
     def on_draw_memory(self, widget, cr):
         """Draw the Memory usage graph."""
-        self.draw_graph(widget, cr, self.memory_usage, (0, 1, 0))
+        self.draw_graph(widget, cr, self.memory_usage, (240, 248, 255))
 
     def on_draw_disk(self, widget, cr):
         """Draw the Disk usage graph."""
-        self.draw_graph(widget, cr, self.disk_usage, (1, 0, 0))
+        self.draw_graph(widget, cr, self.disk_usage, (240, 255, 240))
 
     def draw_graph(self, widget, cr, data, color):
         """Generic function to draw a graph."""
