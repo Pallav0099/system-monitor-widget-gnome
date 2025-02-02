@@ -10,7 +10,7 @@ class TransparentWindow(Gtk.Window):
         self.set_decorated(False)
         print("Window decorations removed.")
 
-        #set window transparent
+        # Set window transparent
         self.set_app_paintable(True)
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
@@ -41,7 +41,7 @@ class TransparentWindow(Gtk.Window):
         self.show_all()
 
     def on_draw_background(self, widget, cr):
-        cr.set_source_rgba(0, 0, 0, 0)
+        cr.set_source_rgba(0, 0, 0, 0)  # Fully transparent background
         cr.paint()
 
     def on_button_press(self, widget, event):
@@ -56,7 +56,7 @@ class SystemMonitorWidget(Gtk.Box):
     def __init__(self):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
-        # data for graphs
+        # Data for graphs
         self.cpu_usage = []
         self.memory_usage = []
         self.disk_usage = []
@@ -92,7 +92,7 @@ class SystemMonitorWidget(Gtk.Box):
         self.pack_start(self.memory_box, True, True, 0)
         self.pack_start(self.disk_box, True, True, 0)
 
-        # data update timer
+        # Data update timer
         GLib.timeout_add(1000, self.update_data)
 
     def update_data(self):
@@ -120,29 +120,34 @@ class SystemMonitorWidget(Gtk.Box):
 
     def on_draw_cpu(self, widget, cr):
         """Draw the CPU usage graph."""
-        self.draw_graph(widget, cr, self.cpu_usage, (255, 239, 213))
+        self.draw_graph(widget, cr, self.cpu_usage, (255/255, 239/255, 213/255)) 
 
     def on_draw_memory(self, widget, cr):
         """Draw the Memory usage graph."""
-        self.draw_graph(widget, cr, self.memory_usage, (240, 248, 255))
+        self.draw_graph(widget, cr, self.memory_usage, (240/255, 248/255, 255/255)) 
 
     def on_draw_disk(self, widget, cr):
         """Draw the Disk usage graph."""
-        self.draw_graph(widget, cr, self.disk_usage, (240, 255, 240))
+        self.draw_graph(widget, cr, self.disk_usage, (240/255, 255/255, 240/255)) 
 
     def draw_graph(self, widget, cr, data, color):
         """Generic function to draw a graph."""
         width, height = widget.get_allocated_width(), widget.get_allocated_height()
-        cr.set_source_rgba(0, 0, 0, 0) #graph background
-        cr.paint()
-        
-        cr.set_source_rgb(0, 0, 0)
+
+        # Set graph background to white
+        cr.set_source_rgba(0, 0, 0, 0) 
+        cr.rectangle(0, 0, width, height)
+        cr.fill()
+
+        # Draw the graph border
+        cr.set_source_rgb(0, 0, 0)  # Black border
         cr.set_line_width(2)
         cr.rectangle(0, 0, width, height)
         cr.stroke()
 
         # Draw the graph data
-        cr.set_source_rgb(*color)
+        cr.set_source_rgb(*color)  # Use the provided color
+        cr.set_line_width(2)
         for i in range(1, len(data)):
             cr.move_to((i - 1) * (width / 50), height - (data[i - 1] / 100 * height))
             cr.line_to(i * (width / 50), height - (data[i] / 100 * height))
